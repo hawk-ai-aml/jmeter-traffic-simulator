@@ -87,4 +87,4 @@ and replace the placeholder in the [deployment.yaml](kustomize/base/deployment.y
 ## Credits
 
 Thanks to https://github.com/hauptmedia/docker-jmeter, https://github.com/hhcordero/docker-jmeter-server 
-and https://github.com/justb4/docker-jmeter for the JMeter Dockerfile I based this project on.
+and https://github.com/justb4/docker-jmeter for the JMeter Dockerfile this project is based on.
