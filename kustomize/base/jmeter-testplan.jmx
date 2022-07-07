@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.5">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <collectionProp name="HeaderManager.headers">
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">Content-Type</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">Accept</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+        </collectionProp>
+      </HeaderManager>
+      <hashTree/>
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Random name from CSV" enabled="true">
+        <stringProp name="filename">files/bundesliga.csv</stringProp>
+        <stringProp name="fileEncoding"></stringProp>
+        <stringProp name="variableNames">random_name</stringProp>
+        <boolProp name="ignoreFirstLine">false</boolProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="quotedData">true</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Random country code from CSV" enabled="true">
+        <stringProp name="filename">files/country_codes.csv</stringProp>
+        <stringProp name="fileEncoding"></stringProp>
+        <stringProp name="variableNames">random_country_code</stringProp>
+        <boolProp name="ignoreFirstLine">false</boolProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="quotedData">true</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Debug outputs" enabled="false">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="BeanShell Sampler" enabled="false">
+          <stringProp name="BeanShellSampler.query">// Debug output to see current set values
+
+log.info(&quot;Current targetThroughput &quot; + props.get(&quot;targetThroughputPerMin&quot;));
+log.info(&quot;Account range: &quot; + props.get(&quot;randomAccountRange&quot;));
+log.info(&quot;AccountID: &quot; + props.get(&quot;weightedAccountId&quot;));
+log.info(&quot;Current noThreads &quot; + props.get(&quot;noThreads&quot;));
+
+Thread.sleep(10000);</stringProp>
+          <stringProp name="BeanShellSampler.filename"></stringProp>
+          <stringProp name="BeanShellSampler.parameters"></stringProp>
+          <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+        </BeanShellSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Prometheus custom metrics" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create custom prometheus metrics" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import io.prometheus.client.*
+
+def targetThroughputPerMin = Gauge.build()
+     .name(&quot;jmeter_target_throughput_per_min&quot;).help(&quot;The current calculated dynamic throughput per min for the time of the day&quot;).register();
+
+def minThroughputPerMin = Gauge.build()
+     .name(&quot;jmeter_min_throughput_per_min&quot;).help(&quot;The minimum dynamic throughput per min for non peak hours&quot;).register();
+
+def maxThroughputPerMin = Gauge.build()
+     .name(&quot;jmeter_max_throughput_per_min&quot;).help(&quot;The maximum dynamic throughput per min for non peak hours&quot;).register();
+
+def percentageReached = Gauge.build()
+     .name(&quot;jmeter_percentage_reached&quot;).help(&quot;The percentage reached within the date interval&quot;).register();
+
+props.put(&quot;jmeter_target_throughput_per_min&quot;, targetThroughputPerMin);
+props.put(&quot;jmeter_min_throughput_per_min&quot;, minThroughputPerMin);
+props.put(&quot;jmeter_max_throughput_per_min&quot;, maxThroughputPerMin);
+props.put(&quot;jmeter_percentage_reached&quot;, percentageReached);</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Random weighted account id" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Random weighted account id" enabled="true">
+          <stringProp name="TestPlan.comments">Purpose of this script is to have a 33% chance of sending transactions from small, medium and large AccountIDs ranges. This simulates for example funds originators who have thousands of customers</stringProp>
+          <stringProp name="scriptLanguage">java</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
+
+accountRange = new ArrayList();
+accountRange.add(&quot;small&quot;);
+accountRange.add(&quot;medium&quot;);
+accountRange.add(&quot;large&quot;);
+
+Random random = new Random();
+
+int randomitem = random.nextInt(accountRange.size());
+String randomAccountRange = accountRange.get(randomitem);
+
+
+switch(randomAccountRange) 
+{
+  case &quot;small&quot;:
+    props.put(&quot;weightedAccountId&quot;, String.valueOf(random.nextInt(100)));
+    break;
+  case &quot;medium&quot;:
+    props.put(&quot;weightedAccountId&quot;, String.valueOf(random.nextInt(99999)));
+    break;
+  case &quot;large&quot;:
+    props.put(&quot;weightedAccountId&quot;, String.valueOf(random.nextInt(999999999)));
+    break;  
+  default:
+    props.put(&quot;weightedAccountId&quot;, String.valueOf(random.nextInt(999999999)));
+    log.error(&quot;RWAID | Unable to generate weighted account id. Wrong option provided. Fall back to default&quot;);
+}
+
+props.put(&quot;randomAccountRange&quot;, randomAccountRange);
+log.info(&quot;RWAID | Sending Transactions with &apos;&quot; + randomAccountRange + &quot;&apos; accountID range.&quot;);
+</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">10000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Dynamic Throughput Sampler" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Dynamic Throughput Sampler" enabled="true">
+          <stringProp name="scriptLanguage">java</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+boolean dynamicTroughputEnabled = ${__P(dynamicTroughputEnabled,true)};
+
+if(dynamicTroughputEnabled){
+	log.info(&quot;DTS | Dynamic Throughput is ENABLED&quot;);
+
+	int peakHour = ${__P(peakHour,12)};
+	int nonPeakHour = ${__P(nonPeakHour,0)};
+	
+	int adjustmentIntervalMS = ${__P(adjustmentIntervalMS,60000)};
+	int minThroughputPerMin = ${__P(minThroughputPerMin,60)};
+	int maxThroughputPerMin = ${__P(maxThroughputPerMin,120)};
+	
+	ZonedDateTime currentTime = LocalDateTime.now().atZone(ZoneId.of(&quot;UTC&quot;));
+	ZonedDateTime peakDateTime = LocalDateTime.now().with(LocalTime.of(peakHour, 0)).atZone(ZoneId.of(&quot;UTC&quot;));
+	ZonedDateTime nonPeakDateTime = LocalDateTime.now().with(LocalTime.of(nonPeakHour, 0)).atZone(ZoneId.of(&quot;UTC&quot;));
+	
+	/*
+	*  Calculates the difference between the min and the max throughput.
+	*  This is the total increase/decrease which needed to be adjusted over the ramp up and ramp down intervals.
+	*
+	*  E.g
+	*
+	*  Min throughput per min = 60
+	*  Max throuchput per min = 180
+	*
+	*  180 - 60 = 120 Throuchput/min. Difference in throughput between peak and non peak hours
+	*
+	*/
+	float throughputDifferencePerMin = (maxThroughputPerMin-minThroughputPerMin);
+	
+	void checkTimeIntervalRecalculationNeededDueToFreshStart(){
+		if (currentTime.compareTo(nonPeakDateTime) &lt; 0 &amp;&amp; currentTime.compareTo(peakDateTime) &lt; 0){
+			if (nonPeakDateTime.compareTo(peakDateTime) &lt; 0){
+				log.info(&quot;DTS | Current Time before first interval. Updating older boundary : non peak time&quot;);
+				nonPeakDateTime = nonPeakDateTime.minusDays(1);
+			} else {
+				log.info(&quot;DTS | Current Time before first interval. Updating older boundary : peak time&quot;);
+				peakDateTime = peakDateTime.minusDays(1);
+			}
+		} else if (currentTime.compareTo(nonPeakDateTime) &gt; 0 &amp;&amp; currentTime.compareTo(peakDateTime) &gt; 0){
+			if (nonPeakDateTime.compareTo(peakDateTime) &lt; 0){
+				log.info(&quot;DTS | Current Time after first interval. Updating older boundary : non peak time&quot;);
+				nonPeakDateTime = nonPeakDateTime.plusDays(1);
+			} else {
+				log.info(&quot;DTS | Current Time after first interval. Updating older boundary : peak time&quot;);
+				peakDateTime = peakDateTime.plusDays(1);
+			}
+		} else {
+			log.info(&quot;DTS | Current Time exactly within specified interval. Nothing to do&quot;);
+		}
+	}
+	
+	void rampUp(ZonedDateTime currentTime, ZonedDateTime nonpeakTime, ZonedDateTime peakTime){
+	   int percentageReached = 100-getPercentageLeft(currentTime, nonPeakDateTime, peakDateTime);
+	   props.put(&quot;percentageReached&quot;, String.valueOf(percentageReached));
+	   log.info(&quot;DTS | Currently at : &quot; + percentageReached + &quot;% till peak time&quot;);
+	   int newThroughput = (int)Math.round(percentageReached*throughputDifferencePerMin/100+minThroughputPerMin);
+	   log.info(&quot;DTS | New calculated throughput based on percentage : &quot; + newThroughput + &quot; Transactions/min | &quot; + (float)newThroughput/60 + &quot; Transactions/sec&quot;);
+	   props.put(&quot;targetThroughputPerMin&quot;, String.valueOf((newThroughput &lt;= maxThroughputPerMin &amp;&amp; newThroughput &gt;= minThroughputPerMin) ? newThroughput : maxThroughputPerMin));
+	}
+	
+	void rampDown(ZonedDateTime currentTime, ZonedDateTime peakTime, ZonedDateTime nonpeakTime){
+	   int percentageReached = getPercentageLeft(currentTime, peakDateTime, nonPeakDateTime);
+	   props.put(&quot;percentageReached&quot;, String.valueOf(percentageReached));
+	   log.info(&quot;DTS | Currently at : &quot; + percentageReached + &quot;% till non peak time&quot;);
+	   int newThroughput = (int)Math.round(percentageReached*throughputDifferencePerMin/100+minThroughputPerMin);
+	   log.info(&quot;DTS | New calculated throughput based on percentage : &quot; + newThroughput + &quot; Transactions/min | &quot; + (float)newThroughput/60 + &quot; Transactions/sec&quot;);
+	   props.put(&quot;targetThroughputPerMin&quot;, String.valueOf((newThroughput &lt;= maxThroughputPerMin &amp;&amp; newThroughput &gt;= minThroughputPerMin) ? newThroughput : minThroughputPerMin));
+	}
+	
+	int getPercentageLeft(ZonedDateTime currentTime, ZonedDateTime start, ZonedDateTime end) {
+	   long now = currentTime.toInstant().toEpochMilli();
+	   long s = start.toInstant().toEpochMilli();
+	   long e = end.toInstant().toEpochMilli();
+	   if (s &gt;= e || now &gt;= e) {
+	       return 0;
+	   }
+	   if (now &lt;= s) {
+	       return 100;
+	   }
+	   return (int) ((e - now) * 100 / (e - s));
+	}
+	
+	checkTimeIntervalRecalculationNeededDueToFreshStart();
+	
+	/*
+	 * Please note that due to this endless loop the &quot;Shutdown&quot; button within the JMeter UI is not working.
+	 * Use the &quot;Stop&quot; button instead. Unfortunately this means you need to restart JMeter everytime you test via the UI, otherwise there is very strange behavior.
+	 * TODO: Check if there is a Interrupt and break out of the endless loop
+	 */
+	while(true){
+	
+		currentTime = LocalDateTime.now().atZone(ZoneId.of(&quot;UTC&quot;));
+
+		log.info(&quot;DTS | BEGIN checking intervals&quot;);
+		log.info(&quot;DTS | Check every:    &quot; + adjustmentIntervalMS + &quot;ms&quot;);
+		log.info(&quot;DTS | Current Time:   &quot; + currentTime.toString());
+		log.info(&quot;DTS | Peak Time:      &quot; + peakDateTime.toString() + &quot; | Max Throughput: &quot; + maxThroughputPerMin);
+		log.info(&quot;DTS | Non Peak Time:  &quot; + nonPeakDateTime.toString() + &quot; | Min Throughput: &quot; + minThroughputPerMin);
+	
+		if (currentTime.compareTo(nonPeakDateTime) &gt; 0 &amp;&amp; currentTime.compareTo(peakDateTime) &lt;= 0){
+		     log.info(&quot;DTS | Currently in Ramp UP Interval&quot;);
+		     rampUp(currentTime, nonPeakDateTime, peakDateTime);
+		 } else if (currentTime.compareTo(nonPeakDateTime) &lt;= 0 &amp;&amp; currentTime.compareTo(peakDateTime) &gt; 0){
+		     log.info(&quot;DTS | Currently in Ramp DOWN Interval&quot;);
+		     rampDown(currentTime, peakDateTime, nonPeakDateTime);
+		 } else {
+		     // Reached a boundary. Jmeter is leaving an interval and it needs to adjust the oldest boundary to the next day
+		     log.info(&quot;DTS | End of Interval reached. Recalculating Intervals&quot;);
+	         if (nonPeakDateTime.compareTo(peakDateTime) &lt; 0){
+	             log.info(&quot;DTS | Leaving Ramp Up Interval. Updating non peak time&quot;);
+	             nonPeakDateTime = nonPeakDateTime.plusDays(1);
+
+	         } else {
+	             log.info(&quot;DTS | Leaving Ramp Up Interval. Updating non peak time&quot;);
+	             peakDateTime = peakDateTime.plusDays(1);
+		     }
+			 log.info(&quot;DTS | New Peak Time: &quot; + peakDateTime.toString());
+			 log.info(&quot;DTS | New Non Peak Time: &quot; + nonPeakDateTime.toString());
+		}
+	
+		log.info(&quot;DTS | END checking intervals&quot;);
+		log.info(&quot;===========================================================&quot;);
+	
+		Thread.sleep(adjustmentIntervalMS);
+	}
+
+}</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Transactions" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">${__P(lCount,-1)}</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(noThreads,3)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampUp,1)}</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <BackendListener guiclass="BackendListenerGui" testclass="BackendListener" testname="Prometheus Backend Listener" enabled="true">
+          <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="testName" elementType="Argument">
+                <stringProp name="Argument.name">testName</stringProp>
+                <stringProp name="Argument.value">jmeter</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="runId" elementType="Argument">
+                <stringProp name="Argument.name">runId</stringProp>
+                <stringProp name="Argument.value">1</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="exporterPort" elementType="Argument">
+                <stringProp name="Argument.name">exporterPort</stringProp>
+                <stringProp name="Argument.value">9001</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="samplersRegExp" elementType="Argument">
+                <stringProp name="Argument.name">samplersRegExp</stringProp>
+                <stringProp name="Argument.value">${__P(samplersRegExp,)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="classname">com.github.kolesnikovm.PrometheusListener</stringProp>
+        </BackendListener>
+        <hashTree/>
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Target Throughput" enabled="true">
+          <intProp name="calcMode">4</intProp>
+          <stringProp name="throughput">${__P(targetThroughputPerMin,60)}</stringProp>
+        </ConstantThroughputTimer>
+        <hashTree/>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Populate custom prometheus metrics" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">def targetThroughputPerMinGauge = props.get(&quot;jmeter_target_throughput_per_min&quot;);
+def minThroughputPerMinGauge = props.get(&quot;jmeter_min_throughput_per_min&quot;);
+def maxThroughputPerMinGauge = props.get(&quot;jmeter_max_throughput_per_min&quot;);
+def percentageReachedGauge = props.get(&quot;jmeter_percentage_reached&quot;);
+
+def targetThroughputPerMinValue = props.get(&quot;targetThroughputPerMin&quot;);
+def minThroughputPerMinValue = props.get(&quot;minThroughputPerMin&quot;);
+def maxThroughputPerMinValue = props.get(&quot;maxThroughputPerMin&quot;);
+def percentageReachedValue = props.get(&quot;percentageReached&quot;);
+
+(targetThroughputPerMinGauge == null || targetThroughputPerMinValue == null ) ? log.warn(&quot;Prometheus or Values not yet initialized (jmeter_target_throughput_per_min)&quot;) : targetThroughputPerMinGauge.set(Double.parseDouble(targetThroughputPerMinValue));
+(minThroughputPerMinGauge == null || minThroughputPerMinValue == null ) ? log.warn(&quot;Prometheus or Values not yet initialized (jmeter_min_throughput_per_min)&quot;) : minThroughputPerMinGauge.set(Double.parseDouble(minThroughputPerMinValue));
+(maxThroughputPerMinGauge == null || maxThroughputPerMinValue == null ) ? log.warn(&quot;Prometheus or Values not yet initialized (jmeter_max_throughput_per_min)&quot;) : maxThroughputPerMinGauge.set(Double.parseDouble(maxThroughputPerMinValue));
+(percentageReachedGauge == null || percentageReachedValue == null ) ? log.warn(&quot;Prometheus or Values not yet initialized (jmeter_percentage_reached)&quot;) : percentageReachedGauge.set(Double.parseDouble(percentageReachedValue));
+</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">1000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="White noise - ${__P(randomAccountRange,combined)}" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&#xd;
+            &quot;sender&quot;: {&#xd;
+              &quot;accountID&quot;: &quot;${__Random(1,999999999)}&quot;,&#xd;
+              &quot;name&quot;: &quot;${random_name}&quot;&#xd;
+            },&#xd;
+            &quot;receiver&quot;: {&#xd;
+              &quot;accountID&quot;: &quot;${__P(weightedAccountId,1000)}&quot;,&#xd;
+              &quot;name&quot;: &quot;${random_name}&quot;&#xd;
+            },&#xd;
+            &quot;amount&quot;: ${__Random(1,99999)}.${__Random(0,99)},&#xd;
+            &quot;currency&quot;: &quot;EUR&quot;,&#xd;
+            &quot;timestamp&quot;: &quot;${__time(yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSS)}&quot;,&#xd;
+		  &quot;metadata&quot;: {&#xd;
+			&quot;senderData&quot;: {&#xd;
+				&quot;contactDetails&quot;: {&#xd;
+					&quot;country&quot;: &quot;${random_country_code}&quot;,&#xd;
+					&quot;zip&quot;: &quot;${__Random(1000,9999)}&quot;,&#xd;
+					&quot;town&quot;: &quot;town${__Random(1000,9999)}&quot;,&#xd;
+					&quot;street&quot;: &quot;street${__Random(1000,9999)}&quot;&#xd;
+				},&#xd;
+			},&#xd;
+			&quot;receiverData&quot;: {&#xd;
+				&quot;contactDetails&quot;: {&#xd;
+					&quot;country&quot;: &quot;${random_country_code}&quot;,&#xd;
+					&quot;zip&quot;: &quot;${__Random(1000,9999)}&quot;,&#xd;
+					&quot;town&quot;: &quot;town${__Random(1000,9999)}&quot;,&#xd;
+					&quot;street&quot;: &quot;street${__Random(1000,9999)}&quot;&#xd;
+				}&#xd;
+			}&#xd;
+		}&#xd;
+}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(server,localhost)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(port,1090)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(protocol,http)}</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">${__P(path,/check)}</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion" enabled="true">
+            <stringProp name="JSON_PATH">$.processed</stringProp>
+            <stringProp name="EXPECTED_VALUE">true</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/>
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <stringProp name="DurationAssertion.duration">20000</stringProp>
+            <stringProp name="Assertion.scope">all</stringProp>
+          </DurationAssertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

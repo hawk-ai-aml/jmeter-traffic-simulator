@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: jmeter
+  name: jmeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jmeter
+  template:
+    metadata:
+      labels:
+        app: jmeter
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9001'
+        prometheus.io/path: '/metrics'
+    spec:
+      serviceAccountName: vault-auth
+      containers:
+        - name: jmeter
+          image: <image>:<tag>
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 1Gi
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 1
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 3
+            failureThreshold: 3
+          ports:
+            - name: http
+              containerPort: 9001
+              protocol: TCP
+          volumeMounts:
+            - name: jmeter-properties
+              mountPath: "/jmeter/jmeter.properties"
+              subPath: "jmeter.properties"
+              readOnly: true
+            - name: jmeter-testplan
+              mountPath: "/jmeter/testplan.jmx"
+              subPath: "testplan.jmx"
+              readOnly: true
+      volumes:
+        - name: jmeter-properties
+          configMap:
+            name: jmeter-properties
+            items:
+              - key: jmeter.properties
+                path: jmeter.properties
+        - name: jmeter-testplan
+          configMap:
+            name: jmeter-testplan
+            items:
+              - key: jmeter-testplan.jmx
+                path: testplan.jmx
+      nodeSelector:
+        hawk.ai/node: worker
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  app: jmeter
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - jmeter
+                topologyKey: "failure-domain.beta.kubernetes.io/zone"

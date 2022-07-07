@@ -1,0 +1,7 @@
+resources:
+  - deployment.yaml
+
+configMapGenerator:
+  - files:
+      - jmeter-testplan.jmx
+    name: jmeter-testplan
