@@ -1,0 +1,12 @@
+[
+  {
+    "httpRequest" : {
+      "method" : "POST",
+      "path" : "/check"
+    },
+    "httpResponse" : {
+      "body" : "{\"processed\": true}",
+      "statusCode": 200
+    }
+  }
+]
