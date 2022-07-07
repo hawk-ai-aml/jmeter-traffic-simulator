@@ -2,7 +2,7 @@ version: '3.2'
 services:
   mockServer:
     image: mockserver/mockserver:5.13.2
-    command: -logLevel INFO -serverPort 1090 -proxyRemotePort 80 -proxyRemoteHost www.mock-server.com
+    command: -logLevel WARN -serverPort 1090
     ports:
       - 1090:1090
     environment:
@@ -19,6 +19,8 @@ services:
       - mockServer
     ports:
       - "9001:9001"
+    links:
+      - mockServer:mockServer
     deploy:
       resources:
         limits:
